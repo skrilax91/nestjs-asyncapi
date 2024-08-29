@@ -1,7 +1,7 @@
 import {
   InfoObject,
   ReferenceObject,
-  SchemaObject,
+  SchemaObject, SecuritySchemeObject,
   ServerVariableObject,
 } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import {
@@ -20,20 +20,28 @@ import { AsyncServerObject } from './asyncapi-server.interface';
 export interface AsyncApiDocument {
   asyncapi: string;
   id?: string;
-  info: InfoObject;
+  info: AsyncInfoObject;
   servers?: Record<string, AsyncServerObject>;
-  channels: AsyncChannelsObject;
+  channels?: AsyncChannelsObject;
+  operations?: Record<string, AsyncOperationObject>;
   components?: AsyncComponentsObject;
+  defaultContentType?: string;
+}
+
+export interface AsyncInfoObject extends InfoObject {
   tags?: AsyncTagObject[];
   externalDocs?: ExternalDocumentationObject;
-  defaultContentType?: string;
 }
 
 export type AsyncChannelsObject = Record<string, AsyncChannelObject>;
 export interface AsyncChannelObject {
+  address: string;
+  messages?: Record<string, AsyncMessageObject>;
+  title?: string;
+  summary?: string;
   description?: string;
-  subscribe?: AsyncOperationObject;
-  publish?: AsyncOperationObject;
+  servers?: ReferenceObject[];
+  tags?: AsyncTagObject[];
   parameters?: Record<string, ParameterObject>;
   bindings?: Record<string, KafkaChannelBinding | AmqpChannelBinding>;
 }
@@ -63,28 +71,27 @@ export interface AsyncComponentsObject {
 
 export interface AsyncMessageObject extends AsyncMessageTraitObject {
   payload?: {
-    type?: AsyncOperationPayload;
-    $ref?: AsyncOperationPayload;
+    schemaFormat?: string;
+    schema: {
+      type?: AsyncOperationPayload;
+      $ref?: AsyncOperationPayload;
+    }
   };
 }
 
-export type MessageType = AsyncMessageObject | ReferenceObject;
-export interface OneOfMessageType {
-  oneOf: MessageType[];
-}
-
-export type AsyncOperationMessage = OneOfMessageType | MessageType;
-
 export interface AsyncOperationObject {
-  channel: string;
-  operationId?: string;
+  action: "send" | "receive";
+  channel: ReferenceObject;
+  title?: string;
   summary?: string;
   description?: string;
+  security?: [SecuritySchemeObject | ReferenceObject];
   tags?: AsyncTagObject[];
-  externalDocs?: ExternalDocumentationObject;
-  bindings?: Record<string, KafkaOperationBinding | AmqpOperationBinding>;
-  traits?: Record<string, AsyncOperationTraitObject>;
-  message?: AsyncOperationMessage;
+  externalDocs?: ExternalDocumentationObject | ReferenceObject;
+  bindings?: KafkaOperationBinding | AmqpOperationBinding | ReferenceObject;
+  traits?: [AsyncOperationTraitObject | ReferenceObject];
+  messages?: ReferenceObject[];
+  reply?: OperationReplyObject | ReferenceObject;
 }
 
 export interface AsyncOperationTraitObject {
@@ -96,10 +103,20 @@ export interface AsyncOperationTraitObject {
   bindings?: Record<string, KafkaOperationBinding | AmqpOperationBinding>;
 }
 
+export interface OperationReplyObject {
+  address: OperationReplyAddressObject | ReferenceObject;
+  channel: ReferenceObject;
+  messages: ReferenceObject[];
+}
+
+export interface OperationReplyAddressObject {
+  description?: string;
+  location: string;
+}
+
 export interface AsyncMessageTraitObject {
   headers?: SchemaObject;
   correlationId?: AsyncCorrelationObject;
-  schemaFormat?: string;
   contentType?: string;
   name?: string;
   title?: string;
@@ -164,6 +181,9 @@ export interface BaseParameterObject {
   description?: string;
   schema?: SchemaObject | ReferenceObject;
   location?: string;
+  enum?: any[];
+  examples?: any[] | Record<string, any>;
+  default?: any;
 }
 
 export interface ExternalDocumentationObject {

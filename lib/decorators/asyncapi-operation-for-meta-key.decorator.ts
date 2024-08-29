@@ -31,7 +31,9 @@ function makeMessage(
     ...message,
     name: message.name || defaultName,
     payload: {
-      type: message.payload,
+      schema: {
+        type: message.payload,
+      }
     },
     headers: makeHeaders(message.headers),
   };

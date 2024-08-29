@@ -4,10 +4,8 @@ import { SchemaObjectFactory } from '@nestjs/swagger/dist/services/schema-object
 import { SwaggerTypesMapper } from '@nestjs/swagger/dist/services/swagger-types-mapper';
 import { getSchemaPath } from '@nestjs/swagger/dist/utils';
 import {
-  AsyncApiOperationOptionsRaw,
   AsyncMessageObject,
   AsyncOperationObject,
-  OneOfMessageType,
 } from '../interface';
 
 export class OperationObjectFactory {
@@ -19,28 +17,17 @@ export class OperationObjectFactory {
   );
 
   create(
-    operation: AsyncApiOperationOptionsRaw,
+    operation: AsyncOperationObject,
     produces: string[],
     schemas: Record<string, SchemaObject>,
   ): AsyncOperationObject {
-    const { message } = operation;
-    const { oneOf } = message as OneOfMessageType;
+    const { messages } = operation;
 
-    if (oneOf) {
-      return {
-        ...operation,
-        message: {
-          oneOf: oneOf.map((i) => ({
-            ...i,
-            payload: {
-              $ref: getSchemaPath(
-                this.getDtoName(i as AsyncMessageObject, schemas),
-              ),
-            },
-          })),
-        },
-      };
-    }
+
+    return {
+      ...operation,
+      messages: messages.map((message) =>
+    };
 
     return {
       ...operation,

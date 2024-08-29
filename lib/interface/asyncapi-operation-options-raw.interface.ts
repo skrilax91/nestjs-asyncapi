@@ -17,7 +17,3 @@ export interface RawAsyncApiMessage {
     };
   };
 }
-
-export interface AsyncApiOperationOptionsRaw extends AsyncOperationObject {
-  type: 'sub' | 'pub';
-}

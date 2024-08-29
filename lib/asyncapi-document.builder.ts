@@ -15,14 +15,14 @@ export class AsyncApiDocumentBuilder {
     AsyncApiDocument,
     'channels'
   > => ({
-    asyncapi: '2.5.0',
+    asyncapi: '3.0.0',
     info: {
       title: '',
       description: '',
       version: '1.0.0',
       contact: {},
+      tags: [],
     },
-    tags: [],
     servers: {},
     components: {},
   });
@@ -76,7 +76,7 @@ export class AsyncApiDocumentBuilder {
   }
 
   public setExternalDoc(description: string, url: string): this {
-    this.document.externalDocs = { description, url };
+    this.document.info.externalDocs = { description, url };
     return this;
   }
 
@@ -90,7 +90,7 @@ export class AsyncApiDocumentBuilder {
     description = '',
     externalDocs?: ExternalDocumentationObject,
   ): this {
-    this.document.tags = this.document.tags.concat(
+    this.document.info.tags = this.document.info.tags.concat(
       pickBy(
         {
           name,
